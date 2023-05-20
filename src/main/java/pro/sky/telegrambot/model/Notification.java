@@ -1,57 +1,88 @@
 package pro.sky.telegrambot.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "notification_task")
 public class Notification {
     @Id
-    private Long chat_id;
-    private String notification_text;
-    private LocalDateTime notification_time;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+    private Long chatId;
+    private String notificationText;
+    private LocalDateTime notificationTime;
 
     public Notification() {
     }
 
-    public Notification(Long chat_id, String notification_text, LocalDateTime notification_time) {
-        this.chat_id = chat_id;
-        this.notification_text = notification_text;
-        this.notification_time = notification_time;
+    public Notification(Long id, Long chatId, String notificationText, LocalDateTime notificationTime) {
+        this.id = id;
+        this.chatId = chatId;
+        this.notificationText = notificationText;
+        this.notificationTime = notificationTime;
     }
 
-    public Long getChat_id() {
-        return chat_id;
+    public Notification(Long chatId, String notificationText, LocalDateTime notificationTime) {
+        this.chatId = chatId;
+        this.notificationText = notificationText;
+        this.notificationTime = notificationTime;
     }
 
-    public void setChat_id(Long chat_id) {
-        this.chat_id = chat_id;
+    public Long getId() {
+        return id;
     }
 
-    public String getNotification_text() {
-        return notification_text;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public void setNotification_text(String notification_text) {
-        this.notification_text = notification_text;
+    public Long getChatId() {
+        return chatId;
     }
 
-    public LocalDateTime getNotification_time() {
-        return notification_time;
+    public void setChatId(Long chatId) {
+        this.chatId = chatId;
     }
 
-    public void setNotification_time(LocalDateTime notification_time) {
-        this.notification_time = notification_time;
+    public String getNotificationText() {
+        return notificationText;
+    }
+
+    public void setNotificationText(String notificationText) {
+        this.notificationText = notificationText;
+    }
+
+    public LocalDateTime getNotificationTime() {
+        return notificationTime;
+    }
+
+    public void setNotificationTime(LocalDateTime notificationTime) {
+        this.notificationTime = notificationTime;
     }
 
     @Override
     public String toString() {
         return "Notification{" +
-                "chat_id=" + chat_id +
-                ", notification_text='" + notification_text + '\'' +
-                ", notification_time=" + notification_time +
+                "Id=" + id +
+                ", chatId=" + chatId +
+                ", notificationText='" + notificationText + '\'' +
+                ", notificationTime=" + notificationTime +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Notification that = (Notification) o;
+        return id.equals(that.id) && chatId.equals(that.chatId) && notificationText.equals(that.notificationText) && notificationTime.equals(that.notificationTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, chatId, notificationText, notificationTime);
     }
 }
