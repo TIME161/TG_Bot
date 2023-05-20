@@ -2,12 +2,13 @@ package pro.sky.telegrambot.listener;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
+import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.request.SendMessage;
-import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import pro.sky.telegrambot.repositoryes.NotificationRepository;
+import pro.sky.telegrambot.service.NotificationService;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -15,13 +16,15 @@ import java.util.List;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
-
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
-
     private final TelegramBot telegramBot;
+    private final NotificationRepository notificationRepository;
+    private final NotificationService notificationService;
 
-    public TelegramBotUpdatesListener(TelegramBot telegramBot) {
+    public TelegramBotUpdatesListener(TelegramBot telegramBot, NotificationRepository notificationRepository, NotificationService notificationService) {
         this.telegramBot = telegramBot;
+        this.notificationRepository = notificationRepository;
+        this.notificationService = notificationService;
     }
 
     @PostConstruct
@@ -31,19 +34,26 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     @Override
     public int process(List<Update> updates) {
-        updates.forEach(update -> {
-            logger.info("Processing update: {}", update);
-            if (update.message().text() != null
-                    && update.message().text().equals("/start")) {
-                if (update.message().from().languageCode().equals("ru")) {
-                    SendMessage message = new SendMessage(update.message().chat().id(),
-                            "Добро пожаловать в мой бот " + update.message().chat().firstName() + "!");
-                    SendResponse response = telegramBot.execute(message);
-                } else {SendMessage message = new SendMessage(update.message().chat().id(),
-                        "Welcome to my bot " + update.message().chat().firstName() + "!");
-                    SendResponse response = telegramBot.execute(message);}
-            }
-        });
+        updates.forEach(this::processUpdate);
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
+    }
+
+    private void processUpdate(Update update) {
+        try {
+            logger.info("Processing update: {}", update);
+            Message message = update.message() != null ? update.message() : update.editedMessage();
+            if (message == null) return;
+
+            String messageText = message.text();
+            if (messageText == null) return;
+
+            if ("/start".equals(messageText)) {
+                notificationService.sendWelcomeMessage(message);
+            } else {
+                notificationService.processNotificationMessage(message, messageText);
+            }
+        } catch (Exception e) {
+            logger.error("Error processing update: {}", update, e);
+        }
     }
 }
