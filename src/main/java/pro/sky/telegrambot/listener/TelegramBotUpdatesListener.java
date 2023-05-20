@@ -98,7 +98,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.execute(invalidFormatMessage);
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "0 0/1 * * * *")
     public void checker() {
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         List<Notification> notifications = notificationRepository.findByNotificationTime(now);
